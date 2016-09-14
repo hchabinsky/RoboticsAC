@@ -51,7 +51,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@TeleOp(name="Template: Iterative OpMode", group="Iterative Opmode")  // @Autonomous(...) is the other common choice
+@TeleOp(name="TestBed (Iterative)", group="Elon")  // @Autonomous(...) is the other common choice
 //@Disabled
 public class TestBedIterative extends OpMode
 {
@@ -103,10 +103,13 @@ public class TestBedIterative extends OpMode
     public void loop() {
         telemetry.addData("Status", "Running: " + runtime.toString());
 
+        double speedLeft = gamepad1.left_stick_y;
+        double speedRight = gamepad1.right_stick_y;
+
         robot.init(hardwareMap);
 
-        robot.motorLeft.setPower(HardwareTestBed.POWER);
-        robot.motorRight.setPower(HardwareTestBed.POWER);
+        robot.motorLeft.setPower(speedLeft);
+        robot.motorRight.setPower(speedRight);
     }
 
     /*
