@@ -44,10 +44,10 @@ public class HardwareTestBed
         hwMap = ahwMap;
 
         // Define and Initialize Motors
-        motorLeft   = hwMap.dcMotor.get("motorOne");
-        motorRight  = hwMap.dcMotor.get("motorTwo");
-        motorLeft.setDirection(DcMotor.Direction.FORWARD); // Set to REVERSE if using AndyMark motors
-        motorRight.setDirection(DcMotor.Direction.REVERSE);// Set to FORWARD if using AndyMark motors
+        motorRight   = hwMap.dcMotor.get("motorOne");
+        motorLeft  = hwMap.dcMotor.get("motorTwo");
+        motorLeft.setDirection(DcMotor.Direction.REVERSE); // Set to REVERSE if using AndyMark motors
+        motorRight.setDirection(DcMotor.Direction.FORWARD);// Set to FORWARD if using AndyMark motors
 
         // Set all motors to zero power
         motorLeft.setPower(0);
