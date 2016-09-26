@@ -30,6 +30,7 @@ public class HardwareDriveBot
     public static final double SLOW_POWER = 0.2;
     public static final double POWER = 1.0;
     public static final double STOP = 0.0;
+    public static final int ENC_ROTATION = 1120;
 
     /* local OpMode members. */
     HardwareMap hwMap           =  null;
@@ -55,11 +56,13 @@ public class HardwareDriveBot
         motorLeft.setPower(0);
         motorRight.setPower(0);
 
-        // Set all motors to run without encoders.
-        // May want to use RUN_USING_ENCODERS if encoders are installed.
-        motorLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        motorRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        // reset encoders
+        motorLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
+        // Set all motors to run without encoders.
+        motorLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        motorRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
     /***
