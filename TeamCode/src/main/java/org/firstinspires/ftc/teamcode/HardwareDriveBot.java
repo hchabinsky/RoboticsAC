@@ -31,6 +31,7 @@ public class HardwareDriveBot
     public static final double POWER = 1.0;
     public static final double STOP = 0.0;
     public static final int ENC_ROTATION = 1120;
+    public static final double WHEEL_DIAMETER = 4.0;
 
     /* local OpMode members. */
     HardwareMap hwMap           =  null;
@@ -49,20 +50,14 @@ public class HardwareDriveBot
         // Define and Initialize Motors
         motorRight   = hwMap.dcMotor.get("motorRight");
         motorLeft  = hwMap.dcMotor.get("motorLeft");
-        motorLeft.setDirection(DcMotor.Direction.REVERSE); // Set to REVERSE if using AndyMark motors
-        motorRight.setDirection(DcMotor.Direction.FORWARD);// Set to FORWARD if using AndyMark motors
+        motorLeft.setDirection(DcMotor.Direction.FORWARD); // Set to REVERSE if using AndyMark motors
+        motorRight.setDirection(DcMotor.Direction.REVERSE);// Set to FORWARD if using AndyMark motors
 
         // Set all motors to zero power
-        motorLeft.setPower(0);
-        motorRight.setPower(0);
+        setMotorSpeeds(STOP);
 
         // reset encoders
-        motorLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        motorRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-        // Set all motors to run without encoders.
-        motorLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        motorRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        resetEncoderData();
     }
 
     /***
@@ -84,6 +79,24 @@ public class HardwareDriveBot
 
         // Reset the cycle clock for the next pass.
         period.reset();
+    }
+
+    public void stop() {
+        motorLeft.setPower(HardwareDriveBot.STOP);
+        motorRight.setPower(HardwareDriveBot.STOP);
+    }
+
+    public void setMotorSpeeds (double speed) {
+        motorLeft.setPower(speed);
+        motorRight.setPower(speed);
+    }
+
+    public void resetEncoderData () {
+        motorLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        motorLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        motorRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 }
 

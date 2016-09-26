@@ -32,8 +32,11 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 package org.firstinspires.ftc.teamcode;
 
+import android.util.Log;
+
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
 
 /**
  * Move2Sec - moves the robot for 2 seconds
@@ -59,39 +62,67 @@ public class MoveWithEncoder extends LinearOpMode {
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
 
-        telemetry.addData("Encoder", robot.motorLeft.getCurrentPosition());
-        telemetry.update();
+        updateEncoderData(robot.motorLeft.getCurrentPosition());
 
-        sleep(2000); // wait t oread the display
+        sleep(2000); // wait to read the display
 
-        // start both motors
-        robot.motorLeft.setPower(HardwareDriveBot.SLOW_POWER);
+        moveRobot(0.3, 24.0);
+
+        sleep(2000);
+
+        // turn robot
+
+        robot.resetEncoderData();
+
+        robot.motorLeft.setPower(-HardwareDriveBot.SLOW_POWER);
         robot.motorRight.setPower(HardwareDriveBot.SLOW_POWER);
 
-        int encTarget = 4 * HardwareDriveBot.ENC_ROTATION; // 4 * 1120
+        int encTarget = 1500;
+
+        waitThenStopRobot(encTarget, robot.motorRight);
+
+        updateEncoderData(robot.motorRight.getCurrentPosition());
+
+        sleep(4000);
+    }
+
+    public void moveRobot (double speed, double inches) {
+
+        robot.resetEncoderData();
+
+        double rotations = inches / (Math.PI * HardwareDriveBot.WHEEL_DIAMETER);
+        int encTarget = (int) (rotations * HardwareDriveBot.ENC_ROTATION);
+
+        robot.setMotorSpeeds(speed);
 
         // wait until we reach our target position
+        waitThenStopRobot(encTarget, robot.motorLeft);
+
+        System.out.println("Encoder" + robot.motorLeft.getCurrentPosition());
+        Log.i("ROBOT", "Encoder" + robot.motorLeft.getCurrentPosition());
+    }
+
+    //wait until we have reached our target position
+    public void waitThenStopRobot (int encTarget, DcMotor motorWithPositionToTrack) {
+
         boolean targetPositionMet = false;
 
         while (targetPositionMet == false) {
 
-            int pos = robot.motorLeft.getCurrentPosition();
+            int pos = motorWithPositionToTrack.getCurrentPosition();
 
-            telemetry.addData("Encoder", pos);
-            telemetry.update();
+            updateEncoderData(pos);
 
             if (pos >= encTarget) {
                 targetPositionMet = true;
             }
         }
 
-        // stop the robot
-        robot.motorLeft.setPower(HardwareDriveBot.STOP);
-        robot.motorRight.setPower(HardwareDriveBot.STOP);
+        robot.stop();
+    }
 
-        telemetry.addData("Encoder", robot.motorLeft.getCurrentPosition());
+    public void updateEncoderData (int position) {
+        telemetry.addData("Encoder", position);
         telemetry.update();
-
-        sleep(4000);
     }
 }
