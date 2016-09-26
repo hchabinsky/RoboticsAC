@@ -21,20 +21,22 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  * Servo channel:  Servo to open left claw:  "left_hand"
  * Servo channel:  Servo to open right claw: "right_hand"
  */
-public class HardwareTestBed
+public class HardwareDriveBot
 {
     /* Public OpMode members. */
     public DcMotor  motorLeft   = null;
     public DcMotor  motorRight  = null;
 
+    public static final double SLOW_POWER = 0.2;
     public static final double POWER = 1.0;
+    public static final double STOP = 0.0;
 
     /* local OpMode members. */
     HardwareMap hwMap           =  null;
     private ElapsedTime period  = new ElapsedTime();
 
     /* Constructor */
-    public HardwareTestBed(){
+    public HardwareDriveBot(){
 
     }
 
@@ -44,8 +46,8 @@ public class HardwareTestBed
         hwMap = ahwMap;
 
         // Define and Initialize Motors
-        motorRight   = hwMap.dcMotor.get("motorOne");
-        motorLeft  = hwMap.dcMotor.get("motorTwo");
+        motorRight   = hwMap.dcMotor.get("motorRight");
+        motorLeft  = hwMap.dcMotor.get("motorLeft");
         motorLeft.setDirection(DcMotor.Direction.REVERSE); // Set to REVERSE if using AndyMark motors
         motorRight.setDirection(DcMotor.Direction.FORWARD);// Set to FORWARD if using AndyMark motors
 
