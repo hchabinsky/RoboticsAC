@@ -11,6 +11,8 @@ import com.qualcomm.robotcore.hardware.UltrasonicSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 /**
+ * @author scottarmstrong, harrisonchabinsky
+ *
  * This is NOT an opmode.
  *
  * This class can be used to define all the specific hardware for a single robot.

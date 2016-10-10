@@ -1,7 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 /**
- * Created by scottarmstrong on 10/7/16.
+ * @author scottarmstrong, harrisonchabinsky
  */
 
 public class ColorData {
