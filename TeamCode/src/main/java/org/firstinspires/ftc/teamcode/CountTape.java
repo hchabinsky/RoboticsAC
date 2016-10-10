@@ -66,15 +66,19 @@ public class CountTape extends LinearOpMode {
         int numOfWhiteLines = 0;
         int inchesToGoBeforeCounting = 12;
 
-        int lowRedThreshold = Integer.MAX_VALUE;
-        int lowGreenThreshold = Integer.MAX_VALUE;
-        int lowBlueThreshold = Integer.MAX_VALUE;
-        int lowAlphaThreshold = Integer.MAX_VALUE;
+        ColorData lowThresholds = new ColorData(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE);
 
-        int highRedThreshold = 0;
-        int highGreenThreshold = 0;
-        int highBlueThreshold = 0;
-        int highAlphaThreshold = 0;
+//        int lowRedThreshold = Integer.MAX_VALUE;
+//        int lowGreenThreshold = Integer.MAX_VALUE;
+//        int lowBlueThreshold = Integer.MAX_VALUE;
+//        int lowAlphaThreshold = Integer.MAX_VALUE;
+
+        ColorData highThresholds = new ColorData(0, 0, 0, 0);
+
+//        int highRedThreshold = 0;
+//        int highGreenThreshold = 0;
+//        int highBlueThreshold = 0;
+//        int highAlphaThreshold = 0;
 
         int wiggleRoomForSensors = 5;
 
@@ -87,20 +91,17 @@ public class CountTape extends LinearOpMode {
 
             if (doCountLines) {
 
-                ColorData currentColorData = new ColorData(robot.sensorColor.red(), robot.sensorColor.green(), robot.sensorColor.blue(), robot.sensorColor.alpha());
+                Boolean[] robotPositionInfo = findRobotPosition(highThresholds, lowThresholds, new ColorData(robot.sensorColor.red(), robot.sensorColor.green(), robot.sensorColor.blue(), robot.sensorColor.alpha()), overTape, wiggleRoomForSensors);
 
-                if (currentColorData.numOfColorsAboveThreshold(highRedThreshold - wiggleRoomForSensors, highBlueThreshold - wiggleRoomForSensors,
-                        highGreenThreshold - wiggleRoomForSensors, highAlphaThreshold - wiggleRoomForSensors) == 4 && overTape == false) {
+                overTape = robotPositionInfo[0];
 
-                    overTape = true;
+                boolean addToLineTotal = robotPositionInfo[1];
+
+                if (addToLineTotal) {
+
                     numOfWhiteLines += 1;
                 }
 
-                if (currentColorData.numOfColorsBelowThreshold(lowRedThreshold + wiggleRoomForSensors, lowBlueThreshold + wiggleRoomForSensors,
-                        lowGreenThreshold + wiggleRoomForSensors, lowAlphaThreshold + wiggleRoomForSensors) == 4) {
-
-                    overTape = false;
-                }
                 telemetry.addData("Over Tape", overTape);
                 telemetry.addData("Number of lines", numOfWhiteLines);
 
@@ -111,43 +112,49 @@ public class CountTape extends LinearOpMode {
                 int blue = robot.sensorColor.blue();
                 int alpha = robot.sensorColor.alpha();
 
-                if (red < lowRedThreshold) {
+                ColorData currentColorData = new ColorData(red, blue, green, alpha);
 
-                    lowRedThreshold = red;
-                }
+                highThresholds = updateMax(currentColorData, highThresholds);
 
-                if (red > highRedThreshold) {
+                lowThresholds = updateMin(currentColorData, lowThresholds);
 
-                    highRedThreshold = red;
-                }
-
-                if (green < lowGreenThreshold) {
-
-                    lowGreenThreshold = green;
-                }
-
-                if (green > highGreenThreshold) {
-
-                    highGreenThreshold = green;
-                }
-                if (blue < lowBlueThreshold) {
-
-                    lowBlueThreshold = blue;
-                }
-
-                if (blue > highBlueThreshold) {
-
-                    highBlueThreshold = blue;
-                }
-                if (alpha < lowAlphaThreshold) {
-
-                    lowAlphaThreshold = alpha;
-                }
-
-                if (alpha > highAlphaThreshold) {
-
-                    highAlphaThreshold = alpha;
-                }
+//                if (red < lowRedThreshold) {
+//
+//                    lowRedThreshold = red;
+//                }
+//
+//                if (red > highRedThreshold) {
+//
+//                    highRedThreshold = red;
+//                }
+//
+//                if (green < lowGreenThreshold) {
+//
+//                    lowGreenThreshold = green;
+//                }
+//
+//                if (green > highGreenThreshold) {
+//
+//                    highGreenThreshold = green;
+//                }
+//                if (blue < lowBlueThreshold) {
+//
+//                    lowBlueThreshold = blue;
+//                }
+//
+//                if (blue > highBlueThreshold) {
+//
+//                    highBlueThreshold = blue;
+//                }
+//                if (alpha < lowAlphaThreshold) {
+//
+//                    lowAlphaThreshold = alpha;
+//                }
+//
+//                if (alpha > highAlphaThreshold) {
+//
+//                    highAlphaThreshold = alpha;
+//                }
 
                 doCountLines = robot.motorLeft.getCurrentPosition() > encTicksToWaitBeforeCountingLines;
             }
@@ -173,8 +180,11 @@ public class CountTape extends LinearOpMode {
 
         double inches = robot.convertTicksToInches(encTicksToBox);
 
-        System.out.println("Low thresholds: " + new ColorData(lowRedThreshold, lowBlueThreshold, lowGreenThreshold, lowAlphaThreshold));
-        System.out.println("High thresholds: " + new ColorData(highRedThreshold, highBlueThreshold, highGreenThreshold, highAlphaThreshold));
+        System.out.println("Low thresholds: " + new ColorData(lowThresholds.getRed(), lowThresholds.getBlue(), lowThresholds.getGreen(), lowThresholds.getAlpha()));
+        System.out.println("High thresholds: " + new ColorData(highThresholds.getRed(), highThresholds.getBlue(), highThresholds.getGreen(), highThresholds.getAlpha()));
+
+//        System.out.println("Low thresholds: " + new ColorData(lowRedThreshold, lowBlueThreshold, lowGreenThreshold, lowAlphaThreshold));
+//        System.out.println("High thresholds: " + new ColorData(highRedThreshold, highBlueThreshold, highGreenThreshold, highAlphaThreshold));
 
         Log.i("Total Inches To Box", Double.toString(inches));
 
@@ -183,4 +193,71 @@ public class CountTape extends LinearOpMode {
         sleep(4000);
     }
 
+    public ColorData updateMax (ColorData currentColorData, ColorData highThresholds) {
+
+        if (currentColorData.getRed() > highThresholds.getRed()) {
+
+            highThresholds.setRed(currentColorData.getRed());
+        }
+        if (currentColorData.getGreen() > highThresholds.getGreen()) {
+
+            highThresholds.setGreen(currentColorData.getGreen());
+        }
+        if (currentColorData.getBlue() > highThresholds.getBlue()) {
+
+            highThresholds.setBlue(currentColorData.getBlue());
+        }
+        if (currentColorData.getAlpha() > highThresholds.getAlpha()) {
+
+            highThresholds.setAlpha(currentColorData.getAlpha());
+        }
+
+        return highThresholds;
+    }
+
+    public ColorData updateMin (ColorData currentColorData, ColorData lowThresholds) {
+
+        if (currentColorData.getRed() < lowThresholds.getRed()) {
+
+            lowThresholds.setRed(currentColorData.getRed());
+        }
+        if (currentColorData.getGreen() < lowThresholds.getGreen()) {
+
+            lowThresholds.setGreen(currentColorData.getGreen());
+        }
+        if (currentColorData.getBlue() < lowThresholds.getBlue()) {
+
+            lowThresholds.setBlue(currentColorData.getBlue());
+        }
+        if (currentColorData.getAlpha() < lowThresholds.getAlpha()) {
+
+            lowThresholds.setAlpha(currentColorData.getAlpha());
+        }
+
+        return lowThresholds;
+    }
+
+    public Boolean[] findRobotPosition(ColorData highThresholds, ColorData lowThresholds, ColorData currentColorData, boolean overTape, int wiggleRoomForSensors) {
+
+        Boolean[] robotPositionInfo = new Boolean[2];
+        boolean addToNumOfWhiteLines = false;
+
+        if (currentColorData.numOfColorsAboveThreshold(highThresholds.getRed() - wiggleRoomForSensors, highThresholds.getBlue() - wiggleRoomForSensors,
+                highThresholds.getGreen() - wiggleRoomForSensors, highThresholds.getAlpha() - wiggleRoomForSensors) == 4 && overTape == false) {
+
+            overTape = true;
+            addToNumOfWhiteLines = true;
+        }
+
+        if (currentColorData.numOfColorsBelowThreshold(lowThresholds.getRed() + wiggleRoomForSensors, lowThresholds.getBlue() + wiggleRoomForSensors,
+                lowThresholds.getGreen() + wiggleRoomForSensors, lowThresholds.getAlpha() + wiggleRoomForSensors) == 4) {
+
+            overTape = false;
+        }
+
+        robotPositionInfo[0] = overTape;
+        robotPositionInfo[1] = addToNumOfWhiteLines;
+
+        return robotPositionInfo;
+    }
 }

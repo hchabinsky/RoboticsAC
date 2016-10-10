@@ -6,16 +6,32 @@ package org.firstinspires.ftc.teamcode;
 
 public class ColorData {
 
-    public int red = 0;
-    public int blue = 0;
-    public int green = 0;
-    public int alpha = 0;
+    private int red = 0;
+    private int blue = 0;
+    private int green = 0;
+    private int alpha = 0;
 
     public ColorData(int red, int blue, int green, int alpha) {
 
         this.red = red;
         this.blue = blue;
         this.green = green;
+        this.alpha = alpha;
+    }
+
+    public void setRed(int red) {
+        this.red = red;
+    }
+
+    public void setBlue(int blue) {
+        this.blue = blue;
+    }
+
+    public void setGreen(int green) {
+        this.green = green;
+    }
+
+    public void setAlpha(int alpha) {
         this.alpha = alpha;
     }
 
