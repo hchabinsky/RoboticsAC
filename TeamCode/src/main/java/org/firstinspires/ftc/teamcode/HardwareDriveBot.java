@@ -11,20 +11,8 @@ import com.qualcomm.robotcore.hardware.UltrasonicSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 /**
- * This is NOT an opmode.
+ * @author scottarmstrong, harrisonchabinsky
  *
- * This class can be used to define all the specific hardware for a single robot.
- * In this case that robot is a Pushbot.
- * See PushbotTeleopTank_Iterative and others classes starting with "Pushbot" for usage examples.
- *
- * This hardware class assumes the following device names have been configured on the robot:
- * Note:  All names are lower case and some have single spaces between words.
- *
- * Motor channel:  Left  drive motor:        "left_drive"
- * Motor channel:  Right drive motor:        "right_drive"
- * Motor channel:  Manipulator drive motor:  "left_arm"
- * Servo channel:  Servo to open left claw:  "left_hand"
- * Servo channel:  Servo to open right claw: "right_hand"
  */
 public class HardwareDriveBot
 {
@@ -62,9 +50,8 @@ public class HardwareDriveBot
         // Define and Initialize Motors
         motorRight   = hwMap.dcMotor.get("motorRight");
         motorLeft  = hwMap.dcMotor.get("motorLeft");
-        motorLeft.setDirection(DcMotor.Direction.FORWARD); // Set to REVERSE if using AndyMark motors
-        motorRight.setDirection(DcMotor.Direction.REVERSE);// Set to FORWARD if using AndyMark motors
-
+        motorLeft.setDirection(DcMotor.Direction.FORWARD);
+        motorRight.setDirection(DcMotor.Direction.REVERSE);
 
         // Set all motors to zero power
         motorLeft.setPower(STOP);
@@ -73,9 +60,8 @@ public class HardwareDriveBot
         // reset encoders
         resetEncoderData();
 
-        /**
-         * Set up the sensors
-         */
+
+        //Set up the sensors
 
         sensorTouch = hwMap.touchSensor.get("sensorTouch");
         sensorColor = hwMap.colorSensor.get("sensorColor");
