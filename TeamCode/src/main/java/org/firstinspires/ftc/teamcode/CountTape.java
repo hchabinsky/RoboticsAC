@@ -32,33 +32,21 @@ public class CountTape extends LinearOpMode {
         int encTicksToBox = 0;
         int numOfWhiteLines = 0;
         int inchesToGoBeforeCounting = 12;
+        int wiggleRoomForSensors = 5;
+        int encTicksToWaitBeforeCountingLines = robot.convertInchesToTicks(inchesToGoBeforeCounting);
 
         ColorData lowThresholds = new ColorData(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE);
-
-//        int lowRedThreshold = Integer.MAX_VALUE;
-//        int lowGreenThreshold = Integer.MAX_VALUE;
-//        int lowBlueThreshold = Integer.MAX_VALUE;
-//        int lowAlphaThreshold = Integer.MAX_VALUE;
-
         ColorData highThresholds = new ColorData(0, 0, 0, 0);
-
-//        int highRedThreshold = 0;
-//        int highGreenThreshold = 0;
-//        int highBlueThreshold = 0;
-//        int highAlphaThreshold = 0;
-
-        int wiggleRoomForSensors = 5;
 
         boolean overTape = false;
         boolean doCountLines = false;
-
-        int encTicksToWaitBeforeCountingLines = robot.convertInchesToTicks(inchesToGoBeforeCounting);
 
         while (robot.sensorTouch.isPressed() == false) {
 
             if (doCountLines) {
 
-                Boolean[] robotPositionInfo = findRobotPosition(highThresholds, lowThresholds, new ColorData(robot.sensorColor.red(), robot.sensorColor.green(), robot.sensorColor.blue(), robot.sensorColor.alpha()), overTape, wiggleRoomForSensors);
+                Boolean[] robotPositionInfo = findRobotPosition(highThresholds, lowThresholds, new ColorData(robot.sensorColor.red(), robot.sensorColor.green(),
+                        robot.sensorColor.blue(), robot.sensorColor.alpha()), overTape, wiggleRoomForSensors);
 
                 overTape = robotPositionInfo[0];
 
@@ -69,59 +57,16 @@ public class CountTape extends LinearOpMode {
                     numOfWhiteLines += 1;
                 }
 
-                telemetry.addData("Over Tape", overTape);
                 telemetry.addData("Number of lines", numOfWhiteLines);
 
             } else {
 
-                int red = robot.sensorColor.red();
-                int green = robot.sensorColor.green();
-                int blue = robot.sensorColor.blue();
-                int alpha = robot.sensorColor.alpha();
-
-                ColorData currentColorData = new ColorData(red, blue, green, alpha);
+                ColorData currentColorData = new ColorData(robot.sensorColor.red(), robot.sensorColor.green(),
+                        robot.sensorColor.blue(), robot.sensorColor.alpha());
 
                 highThresholds = updateMax(currentColorData, highThresholds);
 
                 lowThresholds = updateMin(currentColorData, lowThresholds);
-
-//                if (red < lowRedThreshold) {
-//
-//                    lowRedThreshold = red;
-//                }
-//
-//                if (red > highRedThreshold) {
-//
-//                    highRedThreshold = red;
-//                }
-//
-//                if (green < lowGreenThreshold) {
-//
-//                    lowGreenThreshold = green;
-//                }
-//
-//                if (green > highGreenThreshold) {
-//
-//                    highGreenThreshold = green;
-//                }
-//                if (blue < lowBlueThreshold) {
-//
-//                    lowBlueThreshold = blue;
-//                }
-//
-//                if (blue > highBlueThreshold) {
-//
-//                    highBlueThreshold = blue;
-//                }
-//                if (alpha < lowAlphaThreshold) {
-//
-//                    lowAlphaThreshold = alpha;
-//                }
-//
-//                if (alpha > highAlphaThreshold) {
-//
-//                    highAlphaThreshold = alpha;
-//                }
 
                 doCountLines = robot.motorLeft.getCurrentPosition() > encTicksToWaitBeforeCountingLines;
             }
@@ -129,8 +74,8 @@ public class CountTape extends LinearOpMode {
             encTicksToBox = robot.motorLeft.getCurrentPosition();
 
             telemetry.addData("Inches traveled before box:", robot.convertTicksToInches(encTicksToBox));
-            telemetry.addData("Number of lines crossed", numOfWhiteLines);
             telemetry.update();
+
             idle();
         }
 
@@ -149,9 +94,6 @@ public class CountTape extends LinearOpMode {
 
         System.out.println("Low thresholds: " + new ColorData(lowThresholds.getRed(), lowThresholds.getBlue(), lowThresholds.getGreen(), lowThresholds.getAlpha()));
         System.out.println("High thresholds: " + new ColorData(highThresholds.getRed(), highThresholds.getBlue(), highThresholds.getGreen(), highThresholds.getAlpha()));
-
-//        System.out.println("Low thresholds: " + new ColorData(lowRedThreshold, lowBlueThreshold, lowGreenThreshold, lowAlphaThreshold));
-//        System.out.println("High thresholds: " + new ColorData(highRedThreshold, highBlueThreshold, highGreenThreshold, highAlphaThreshold));
 
         Log.i("Total Inches To Box", Double.toString(inches));
 
