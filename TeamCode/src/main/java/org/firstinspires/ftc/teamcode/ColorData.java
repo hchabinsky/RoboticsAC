@@ -51,7 +51,16 @@ public class ColorData {
         return alpha;
     }
 
-    public int numOfColorsAboveThreshold(int redThreshold, int greenThreshold, int blueThreshold, int alphaThreshold) {
+    /**
+     * Counts how many of its fields are above inputted thresholds
+     *
+     * @param redThreshold
+     * @param greenThreshold
+     * @param blueThreshold
+     * @param alphaThreshold
+     * @return boolean if all the fields are above their respective thresholds
+     */
+    public boolean allColorsAboveThreshold(int redThreshold, int greenThreshold, int blueThreshold, int alphaThreshold) {
 
         int numAbove = 0;
 
@@ -71,10 +80,19 @@ public class ColorData {
             numAbove += 1;
         }
 
-        return numAbove;
+        return numAbove == 4;
     }
 
-    public int numOfColorsBelowThreshold(int redThreshold, int greenThreshold, int blueThreshold, int alphaThreshold) {
+    /**
+     * Counts how many of its fields are below inputted thresholds
+     *
+     * @param redThreshold
+     * @param greenThreshold
+     * @param blueThreshold
+     * @param alphaThreshold
+     * @return boolean if all the fields are below their respective thresholds
+     */
+    public boolean allColorsBelowThreshold(int redThreshold, int greenThreshold, int blueThreshold, int alphaThreshold) {
 
         int numBelow = 0;
 
@@ -94,7 +112,7 @@ public class ColorData {
             numBelow += 1;
         }
 
-        return numBelow;
+        return numBelow == 4;
     }
 
     @Override

@@ -128,14 +128,14 @@ public class SensorLoop extends LinearOpMode {
 
                 ColorData currentColorData = new ColorData(robot.sensorColor.red(), robot.sensorColor.green(), robot.sensorColor.blue(), robot.sensorColor.alpha());
 
-                if (currentColorData.numOfColorsAboveThreshold(highRedThreshold - wiggleRoomForSensors, highBlueThreshold - wiggleRoomForSensors,
+                if (currentColorData.allColorsAboveThreshold(highRedThreshold - wiggleRoomForSensors, highBlueThreshold - wiggleRoomForSensors,
                         highGreenThreshold - wiggleRoomForSensors, highAlphaThreshold - wiggleRoomForSensors) == 4 && overTape == false) {
 
                         overTape = true;
                         numOfWhiteLines += 1;
                 }
 
-                if (currentColorData.numOfColorsBelowThreshold(lowRedThreshold + wiggleRoomForSensors, lowBlueThreshold + wiggleRoomForSensors,
+                if (currentColorData.allColorsBelowThreshold(lowRedThreshold + wiggleRoomForSensors, lowBlueThreshold + wiggleRoomForSensors,
                         lowGreenThreshold + wiggleRoomForSensors, lowAlphaThreshold + wiggleRoomForSensors) == 4) {
 
                     overTape = false;

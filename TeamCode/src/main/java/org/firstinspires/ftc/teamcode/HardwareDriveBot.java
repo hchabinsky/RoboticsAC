@@ -5,33 +5,40 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.GyroSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.LightSensor;
-import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.hardware.UltrasonicSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 /**
- * @author scottarmstrong, harrisonchabinsky
+ * Defines variables for parts of the robots hardware and basic methods that calculate values from
+ * the hardware variables as well as move the robot
  *
+ * @author scottarmstrong, harrisonchabinsky
  */
-public class HardwareDriveBot
-{
-    /* Public OpMode members. */
-    public DcMotor  motorLeft   = null;
-    public DcMotor  motorRight  = null;
-    public TouchSensor sensorTouch = null;
-    public ColorSensor sensorColor = null;
-    public GyroSensor sensorGyro = null;
-    public TouchSensor sensorLegoTouch = null;
-    public LightSensor sensorLegoLight = null;
-    public UltrasonicSensor sensorUltrasonic = null;
+public class HardwareDriveBot {
 
+    /* Public OpMode members. */
+
+    // hardware specific constants:
     public static final double SLOW_POWER = 0.2;
     public static final double POWER = 1.0;
     public static final double STOP = 0.0;
     public static final int ENC_ROTATION = 1120;
     public static final double WHEEL_DIAMETER = 4.06;
     public static final double WHEEL_BASE = 10.5;//need to actually measure this
+
+
+    //~~~~~~~~~~ motors ~~~~~~~~~~
+    public DcMotor  motorLeft   = null;
+    public DcMotor  motorRight  = null;
+
+    //~~~~~~~~~~ sensors ~~~~~~~~~~
+    public TouchSensor sensorTouch = null;
+    public ColorSensor sensorColor = null;
+    public GyroSensor sensorGyro = null;
+    public TouchSensor sensorLegoTouch = null;
+    public LightSensor sensorLegoLight = null;
+    public UltrasonicSensor sensorUltrasonic = null;
 
     /* local OpMode members. */
     HardwareMap hwMap           =  null;
@@ -96,8 +103,20 @@ public class HardwareDriveBot
     }
 
     public void stop() {
+
         motorLeft.setPower(STOP);
         motorRight.setPower(STOP);
+    }
+
+    /**
+     * Makes the robot turn in a counter clockwise direction
+     *
+     * @param speed the robot should turn at
+     */
+    public void spin(double speed) {
+
+        motorLeft.setPower(-speed);
+        motorRight.setPower(speed);
     }
 
     public void setRobotSpeed(double speed) {
@@ -106,11 +125,24 @@ public class HardwareDriveBot
         motorRight.setPower(speed);
     }
 
+
+    /**
+     *  Coverts encoder ticks to inches
+     *
+     * @param encTicks number of encTicks to be converted
+     * @return int of the corresponding number of inches
+     */
     public double convertTicksToInches(int encTicks) {
 
         return Math.PI * WHEEL_DIAMETER * (encTicks / ENC_ROTATION);
     }
 
+    /**
+     *  Coverts inches into encoder ticks
+     *
+     * @param inches number of inches to be converted
+     * @return int of the corresponding number of encoder ticks
+     */
     public static int convertInchesToTicks(double inches) {
 
         // translate the distance in inches to encoder ticks:
@@ -120,15 +152,23 @@ public class HardwareDriveBot
         return encoderTicks;
     }
 
-    public int convertDegreesToTicks(double degrees) {
+    /**
+     * convertDegreesToTicks - convert turn angle to encoder ticks
+     *
+     * @param degrees  turn angle of the robot, positive values are clockwise
+     * @return int of the corresponding number of encoder ticks
+     */
+    public static int convertDegreesToTicks(double degrees) {
 
-        double wheelRotations = ((degrees / 360) * Math.PI * WHEEL_BASE) / (Math.PI * WHEEL_DIAMETER);
-        int encoderTarget = (int) (wheelRotations * ENC_ROTATION);
+        double wheelRotations = (degrees / 360.0) * Math.PI * HardwareDriveBot.WHEEL_BASE
+                / (Math.PI * HardwareDriveBot.WHEEL_DIAMETER);
+        int encoderTarget = (int)(wheelRotations * HardwareDriveBot.ENC_ROTATION);
 
         return encoderTarget;
     }
 
     public void resetEncoderData () {
+
         motorLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         motorRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 

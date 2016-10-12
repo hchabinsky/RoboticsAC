@@ -6,11 +6,10 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 /**
- * SensorLoop
+ * Counts the pieces of tape that the robot moves over before the robot's touchSensor is pressed
  *
  * @author scottarmstrong, harrisonchabinsky
  */
-
 @TeleOp(name="CountTape", group="Elon")
 public class CountTape extends LinearOpMode {
 
@@ -57,6 +56,7 @@ public class CountTape extends LinearOpMode {
                     numOfWhiteLines += 1;
                 }
 
+                //Using telemetry calls to display the number of lines as they are found
                 telemetry.addData("Number of lines", numOfWhiteLines);
 
             } else {
@@ -73,6 +73,7 @@ public class CountTape extends LinearOpMode {
 
             encTicksToBox = robot.motorLeft.getCurrentPosition();
 
+            //Using telemetry calls to display the traveled distance in inches as the robot moves toward the wall
             telemetry.addData("Inches traveled before box:", robot.convertTicksToInches(encTicksToBox));
             telemetry.update();
 
@@ -80,6 +81,12 @@ public class CountTape extends LinearOpMode {
         }
 
         robot.stop();
+
+
+        double inches = robot.convertTicksToInches(encTicksToBox);
+
+        //Showing the traveled distance in inches on the Android Studio logcat once the wall was hit
+        Log.i("Total Inches To Box", Double.toString(inches));
 
         robot.setRobotSpeed(-HardwareDriveBot.SLOW_POWER);
 
@@ -90,14 +97,9 @@ public class CountTape extends LinearOpMode {
 
         robot.stop();
 
-        double inches = robot.convertTicksToInches(encTicksToBox);
-
+        //Showing the thresholds from the calibration on the Android Studio console (requirement)
         System.out.println("Low thresholds: " + new ColorData(lowThresholds.getRed(), lowThresholds.getBlue(), lowThresholds.getGreen(), lowThresholds.getAlpha()));
         System.out.println("High thresholds: " + new ColorData(highThresholds.getRed(), highThresholds.getBlue(), highThresholds.getGreen(), highThresholds.getAlpha()));
-
-        Log.i("Total Inches To Box", Double.toString(inches));
-
-        telemetry.update();
 
         sleep(4000);
     }
@@ -151,15 +153,15 @@ public class CountTape extends LinearOpMode {
         Boolean[] robotPositionInfo = new Boolean[2];
         boolean addToNumOfWhiteLines = false;
 
-        if (currentColorData.numOfColorsAboveThreshold(highThresholds.getRed() - wiggleRoomForSensors, highThresholds.getBlue() - wiggleRoomForSensors,
-                highThresholds.getGreen() - wiggleRoomForSensors, highThresholds.getAlpha() - wiggleRoomForSensors) == 4 && overTape == false) {
+        if (currentColorData.allColorsAboveThreshold(highThresholds.getRed() - wiggleRoomForSensors, highThresholds.getBlue() - wiggleRoomForSensors,
+                highThresholds.getGreen() - wiggleRoomForSensors, highThresholds.getAlpha() - wiggleRoomForSensors) && overTape == false) {
 
             overTape = true;
             addToNumOfWhiteLines = true;
         }
 
-        if (currentColorData.numOfColorsBelowThreshold(lowThresholds.getRed() + wiggleRoomForSensors, lowThresholds.getBlue() + wiggleRoomForSensors,
-                lowThresholds.getGreen() + wiggleRoomForSensors, lowThresholds.getAlpha() + wiggleRoomForSensors) == 4) {
+        if (currentColorData.allColorsBelowThreshold(lowThresholds.getRed() + wiggleRoomForSensors, lowThresholds.getBlue() + wiggleRoomForSensors,
+                lowThresholds.getGreen() + wiggleRoomForSensors, lowThresholds.getAlpha() + wiggleRoomForSensors)) {
 
             overTape = false;
         }
