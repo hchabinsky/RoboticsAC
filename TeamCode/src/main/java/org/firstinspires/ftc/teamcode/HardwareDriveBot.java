@@ -25,7 +25,7 @@ public class HardwareDriveBot {
     public static final double STOP = 0.0;
     public static final int ENC_ROTATION = 1120;
     public static final double WHEEL_DIAMETER = 4.06;
-    public static final double WHEEL_BASE = 10.5;//need to actually measure this
+    public static final double WHEEL_BASE = 11.85;
 
 
     //~~~~~~~~~~ motors ~~~~~~~~~~
@@ -72,7 +72,7 @@ public class HardwareDriveBot {
 
         sensorTouch = hwMap.touchSensor.get("sensorTouch");
         sensorColor = hwMap.colorSensor.get("sensorColor");
-        //sensorGyro = hwMap.gyroSensor.get("sensorGyro");
+        sensorGyro = hwMap.gyroSensor.get("sensorGyro");
         sensorLegoLight = hwMap.lightSensor.get("sensorLegoLight");
         sensorLegoTouch = hwMap.touchSensor.get("sensorLegoTouch");
         sensorUltrasonic = hwMap.ultrasonicSensor.get("sensorUltrasonic");

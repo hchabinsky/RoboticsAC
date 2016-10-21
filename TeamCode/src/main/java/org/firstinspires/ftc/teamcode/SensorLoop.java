@@ -1,226 +1,111 @@
-/*
-Copyright (c) 2016 Robert Atkinson
 
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without modification,
-are permitted (subject to the limitations in the disclaimer below) provided that
-the following conditions are met:
-
-Redistributions of source code must retain the above copyright notice, this list
-of conditions and the following disclaimer.
-
-Redistributions in binary form must reproduce the above copyright notice, this
-list of conditions and the following disclaimer in the documentation and/or
-other materials provided with the distribution.
-
-Neither the name of Robert Atkinson nor the names of his contributors may be used to
-endorse or promote products derived from this software without specific prior
-written permission.
-
-NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY THIS
-LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
-THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESSFOR A PARTICULAR PURPOSE
-ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE
-FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
-TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
-THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
 package org.firstinspires.ftc.teamcode;
-
-import android.util.Log;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.Range;
 
 /**
- * SensorLoop
+ * SensorLoop - reads several sensors and displays their status or values on the DS phone.
  *
- * @author scottarmstrong, harrisonchabinsky
+ * @author Jochen Fischer
+ * @version 1.0 - 9/18/2016
+ * @version 1.1 - 10/4/2016 - added legacy sensors (light, touch, ultrasound) and gamepad control.
+ *
  */
-
-@TeleOp(name="SensorLoop", group="Elon")
+@TeleOp(name="SensorLoop", group="ElonDev")
+// @Disabled
 public class SensorLoop extends LinearOpMode {
 
-    // define the robot hardware
-    HardwareDriveBot robot = new HardwareDriveBot();
+    /* Declare OpMode members. */
+    private ElapsedTime runtime = new ElapsedTime();
+
+    // define the robot hardware:
+    HardwareDriveBot robot   = new HardwareDriveBot();   // Use the Drivebot hardware
 
     @Override
     public void runOpMode() throws InterruptedException {
 
-        // initialize the robot
+        // initialize the hardware
+        // including the use of encoders
         robot.init(hardwareMap);
 
-        robot.resetEncoderData();
+        // calibrate the gyroscope:
+        telemetry.addData("Status", "calibrating gyroscope");
+        telemetry.update();
+        robot.sensorGyro.calibrate();
 
-        telemetry.addData("Status", "Initializing gryoscope");
+        // make sure the gyro is calibrated:
+        while (robot.sensorGyro.isCalibrating())  {
+            idle();
+        }
+
+        // get the rotation angle from the gyroscope:
+        int heading = robot.sensorGyro.getHeading();
+        telemetry.addData("Heading", String.format("%03d", heading));
+
+        telemetry.addData("Status", "Initialized");
         telemetry.update();
 
-        //robot.sensorGyro.calibrate();
-
-//        while (robot.sensorGyro.isCalibrating()) {
-//            idle();
-//        }
-
-        telemetry.addData("Status", "Initialized gyroscope");
-        telemetry.update();
-
+        // Wait for the game to start (driver presses PLAY)
         waitForStart();
+        runtime.reset();
 
-//        while (opModeIsActive()) {
-//
-//            boolean isPressed = robot.sensorTouch.isPressed();
-//            String strTouch = isPressed ? "PRESSED" : "released";
-//
-//            isPressed =robot.sensorLegoTouch.isPressed();
-//
-//            double light = robot.sensorLegoLight.getLightDetected();
-//
-//            double distance = robot.sensorUltraSonic.getUltrasonicLevel();
-//
-//            double heading = robot.sensorGyro.getHeading();
-//
-//            telemetry.addData("light", String.format("%.3f", light));
-//            telemetry.addData("distance", String.format("%3f",distance));
-//
-//            int red = robot.sensorColor.red();
-//            int green = robot.sensorColor.green();
-//            int blue = robot.sensorColor.blue();
-//            int alpha = robot.sensorColor.alpha();
-//
-//            telemetry.addData("touch", strTouch);
-//            telemetry.addData("color", String.format("R:%3d G:%3d B:%3d A:%3d", red, green, blue, alpha));
-//            telemetry.update();
-//
-//            idle();
-//        }
+        // run until the end of the match (driver presses STOP)
+        while (opModeIsActive()) {
 
-        robot.setRobotSpeed(HardwareDriveBot.SLOW_POWER);
+            // move the robot using the gamepad:
+            double speed = -gamepad1.left_stick_y  * robot.SLOW_POWER;
+            double turn  =  gamepad1.right_stick_x * robot.SLOW_POWER;
 
-        int encTicksToBox = 0;
-        int numOfWhiteLines = 0;
-        int inchesToGoBeforeCounting = 12;
+            double powerL = Range.clip(speed + turn, -1.0, 1.0 );
+            double powerR = Range.clip(speed - turn, -1.0, 1.0 );
 
-        int lowRedThreshold = Integer.MAX_VALUE;
-        int lowGreenThreshold = Integer.MAX_VALUE;
-        int lowBlueThreshold = Integer.MAX_VALUE;
-        int lowAlphaThreshold = Integer.MAX_VALUE;
+            robot.motorLeft.setPower(powerL);
+            robot.motorRight.setPower(powerR);
 
-        int highRedThreshold = 0;
-        int highGreenThreshold = 0;
-        int highBlueThreshold = 0;
-        int highAlphaThreshold = 0;
+            // turn active lights on color and light sensor on and off:
+            if (gamepad1.b) robot.sensorLegoLight.enableLed(true);
+            if (gamepad1.x) robot.sensorLegoLight.enableLed(false);
+            if (gamepad1.y) robot.sensorColor.enableLed(true);
+            if (gamepad1.a) robot.sensorColor.enableLed(false);
 
-        int wiggleRoomForSensors = 5;
+            // read the color sensor:
+            int red = robot.sensorColor.red();
+            int green = robot.sensorColor.green();
+            int blue = robot.sensorColor.blue();
+            int alpha = robot.sensorColor.alpha();
 
-        boolean overTape = false;
-        boolean doCountLines = false;
+            // read the Lego light sensor:
+            double light = robot.sensorLegoLight.getLightDetected();
+            double rawLight = robot.sensorLegoLight.getRawLightDetected();
 
-        int encTicksToWaitBeforeCountingLines = robot.convertInchesToTicks(inchesToGoBeforeCounting);
+            // read the touch sensor:
+            boolean isPressed = robot.sensorTouch.isPressed();
+            String strButton = isPressed ? "PRESSED" : "released";
 
-        while (robot.sensorTouch.isPressed() == false) {
+            // second touch sensor:
+            isPressed = robot.sensorLegoTouch.isPressed();
+            String strLegoTouch = isPressed ? "PRESSED" : "released";
 
-            if (doCountLines) {
+            // get the rotation angle from the gyroscope:
+            heading = robot.sensorGyro.getHeading();
 
-                ColorData currentColorData = new ColorData(robot.sensorColor.red(), robot.sensorColor.green(), robot.sensorColor.blue(), robot.sensorColor.alpha());
+            // ultrasonic sensor:
+            double distance = robot.sensorUltrasonic.getUltrasonicLevel();
 
-                if (currentColorData.allColorsAboveThreshold(highRedThreshold - wiggleRoomForSensors, highBlueThreshold - wiggleRoomForSensors,
-                        highGreenThreshold - wiggleRoomForSensors, highAlphaThreshold - wiggleRoomForSensors) == 4 && overTape == false) {
-
-                        overTape = true;
-                        numOfWhiteLines += 1;
-                }
-
-                if (currentColorData.allColorsBelowThreshold(lowRedThreshold + wiggleRoomForSensors, lowBlueThreshold + wiggleRoomForSensors,
-                        lowGreenThreshold + wiggleRoomForSensors, lowAlphaThreshold + wiggleRoomForSensors) == 4) {
-
-                    overTape = false;
-                }
-
-                telemetry.addData("Over Tape", overTape);
-                telemetry.addData("Number of lines", numOfWhiteLines);
-
-        } else {
-
-                int red = robot.sensorColor.red();
-                int green = robot.sensorColor.green();
-                int blue = robot.sensorColor.blue();
-                int alpha = robot.sensorColor.alpha();
-
-                if (red < lowRedThreshold) {
-
-                    lowRedThreshold = red;
-                }
-
-                if (red > highRedThreshold) {
-
-                    highRedThreshold = red;
-                }
-
-                if (green < lowGreenThreshold) {
-
-                    lowGreenThreshold = green;
-                }
-
-                if (green > highGreenThreshold) {
-
-                    highGreenThreshold = green;
-                }
-                if (blue < lowBlueThreshold) {
-
-                    lowBlueThreshold = blue;
-                }
-
-                if (blue > highBlueThreshold) {
-
-                    highBlueThreshold = blue;
-                }
-                if (alpha < lowAlphaThreshold) {
-
-                    lowAlphaThreshold = alpha;
-                }
-
-                if (alpha > highAlphaThreshold) {
-
-                    highAlphaThreshold = alpha;
-                }
-
-                doCountLines = robot.motorLeft.getCurrentPosition() > encTicksToWaitBeforeCountingLines;
-        }
-
-            encTicksToBox = robot.motorLeft.getCurrentPosition();
-
-            telemetry.addData("Inches traveled before box:", robot.convertTicksToInches(encTicksToBox));
-            telemetry.addData("Number of lines crossed", numOfWhiteLines);
+            // add telemetry data:
+            telemetry.addData("Color", String.format("red=%3d G=%3d B=%3d A=%3d", red, green, blue, alpha));
+            telemetry.addData("light", String.format("light=%.3f  rawLight=%.3f", light, rawLight));
+            telemetry.addData("Touch", "button is " + strButton);
+            telemetry.addData("Lego Touch Sensor", "button is " + strLegoTouch);
+            telemetry.addData("Ultrasonic", String.format("distance = %.1fcm", distance));
+            telemetry.addData("Heading", String.format("%03d", heading));
+            telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.update();
-            idle();
+
+            idle(); // Always call idle() at the bottom of your while(opModeIsActive()) loop
         }
-
-        robot.stop();
-
-        robot.setRobotSpeed(-HardwareDriveBot.SLOW_POWER);
-
-        while (robot.motorLeft.getCurrentPosition() > 0) {
-
-            idle();
-        }
-
-        robot.stop();
-
-        double inches = robot.convertTicksToInches(encTicksToBox);
-
-        System.out.println("Low thresholds: " + new ColorData(lowRedThreshold, lowBlueThreshold, lowGreenThreshold, lowAlphaThreshold));
-        System.out.println("High thresholds: " + new ColorData(highRedThreshold, highBlueThreshold, highGreenThreshold, highAlphaThreshold));
-
-        Log.i("Total Inches To Box", Double.toString(inches));
-
-        telemetry.update();
-
-        sleep(4000);
     }
-
 }
