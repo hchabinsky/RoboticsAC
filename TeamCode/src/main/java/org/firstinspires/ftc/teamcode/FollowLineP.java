@@ -5,7 +5,6 @@ import android.util.Log;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 /**
@@ -29,10 +28,12 @@ public class FollowLineP extends LinearOpMode {
     // parameters used by the controller:
     private double speed = 0.2;
     private int reference = (5+47)/2;
-    private double Kp = 0.005;
     private double Kc = 0.01;
-    private double Ki = 0.0;
+    private double Kp = 0.45 * Kc;
+    private double Ki = 0.54 * Kc;
     private double Kd = 0.0;
+    private double Pc = 0.339285714;
+
 
     private double dt = 50.0;  // interval in millisconds
     private double dT = dt/1000.0;   // interval in secondes
@@ -41,6 +42,10 @@ public class FollowLineP extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
+
+
+        /**NOT THE P CONTROLLER TO BE GRADED, THAT'S PFollowLineController**/
+
 
         // initialize the hardware
         robot.init(hardwareMap);
@@ -54,8 +59,11 @@ public class FollowLineP extends LinearOpMode {
         waitForStart();
         runtime.reset();
 
+
+
+
         // run until the end of the match (driver presses STOP)
-        while (opModeIsActive()) {
+        while (runtime.seconds() < 10) {
 
             // read the current light sensor value:
             int brightness = robot.sensorColor.alpha();
@@ -63,7 +71,7 @@ public class FollowLineP extends LinearOpMode {
             // implementation of P-controller:
             double error = reference - brightness;
 
-            double turn = 0.5 * Kp * error;
+            double turn = Kc * error;
 
             robot.motorLeft.setPower(speed - turn);
             robot.motorRight.setPower(speed + turn);
@@ -80,5 +88,6 @@ public class FollowLineP extends LinearOpMode {
                 idle();
             }
         }
+        robot.stop();
     }
 }
